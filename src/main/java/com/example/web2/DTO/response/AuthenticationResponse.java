@@ -13,5 +13,7 @@ import lombok.Setter;
 public class AuthenticationResponse {
     private String token;
     private Boolean Authenticated;
+    private String Type;
+    private String username;
 
 }

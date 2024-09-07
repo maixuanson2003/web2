@@ -36,21 +36,28 @@ public class ConversationServiceimpl implements ConversationService {
 
     @Override
     public void CreateConversation(String token) {
+        System.out.println("Received Token: " + token);
         Jwt jwt=jwtDecoder.decode(token);
         Long useridLong = jwt.getClaim("userid");
         Integer userid = useridLong.intValue();
         boolean CheckCOnversationExists=false;
+        actor actors=actorRepository.findById(userid).orElseThrow(()->new RuntimeException("not found"));
+        List<Conversations> conversationOfActors=actors.getConservations();
         List<Conversations> conversations=conversationRepository.findAll();
-        for (Conversations conversations1:conversations){
-           List<actor> actors=conversations1.getActors();
-           for (actor actor:actors){
-               if (actor.getId()==userid && !actor.getType().equals("ADMIN")){
-                   CheckCOnversationExists=true;
-                   break;
-               }
-           }
+        int result=0;
+        for (Conversations conversationactor:conversationOfActors){
+            for (Conversations conversations1:conversations){
+                if (conversationactor.getId()==conversations1.getId()){
+                    result++;
+                    break;
+                }
+            }
         }
-        if (!CheckCOnversationExists){
+        if (result==conversationOfActors.size()){
+            CheckCOnversationExists=true;
+        }
+
+        if (!CheckCOnversationExists|| conversationOfActors.size()==0){
             List<actor> actorsAdd=new ArrayList<>();
             actor actor1=actorRepository.findById(userid).orElseThrow(()->new RuntimeException("not found user"));
             actorsAdd.add(findActorByRoleAdmin());
@@ -62,9 +69,48 @@ public class ConversationServiceimpl implements ConversationService {
             conversationRepository.save(NewConversation);
         }
     }
+    @Override
+    public ConversationResponse findConversationByUserName(String name){
+        List<Conversations> conversationsList=conversationRepository.findAll();
+        boolean Check=false;
+        for (Conversations conversations:conversationsList){
+            List<actor> actors=conversations.getActors();
+            String namUserReCevie="";
+            for (actor actor:actors){
+                if (actor.getUsername().equals(name)) {
+                    Check=true;
+                    namUserReCevie=actor.getUsername();
+                }
+            }
+          if (Check){
+              List<Chat> chatList=conversations.getChats();
+              List<Chatinfor> chatinforList=new ArrayList<>();
+              for (Chat chat:chatList){
+                  Chatinfor chatinfor=new Chatinfor().builder()
+                          .Messageid(chat.getId())
+                          .Content(chat.getContent())
+                          .userRceive(chat.getUserRceive())
+                          .userSender(chat.getUserSend())
+                          .build();
+                  chatinforList.add(chatinfor);
+              }
+              ConversationResponse conversationResponse =new ConversationResponse().builder()
+                      .id(conversations.getId())
+                      .nameUserRecevive(namUserReCevie)
+                      .chatinfors(chatinforList)
+                      .build();
+              return conversationResponse ;
+          }
+        }
+        return null;
+    }
 
     @Override
-    public ConversationResponse findConversationById(Long id) {
+    public ConversationResponse findConversationById(Long id,String token) {
+        Jwt jwt=jwtDecoder.decode(token);
+        Long useridLong = jwt.getClaim("userid");
+        Integer userid = useridLong.intValue();
+        actor actor=actorRepository.findById(userid).orElseThrow(()->new RuntimeException("not found"));
         Conversations conversations=conversationRepository.findById(id).orElseThrow(()->new RuntimeException("not found"));
         List<Chat> chatList=conversations.getChats();
         List<Chatinfor> chatinforList=new ArrayList<>();
@@ -77,15 +123,27 @@ public class ConversationServiceimpl implements ConversationService {
                     .build();
             chatinforList.add(chatinfor);
         }
+        String nameUserReCevie="";
+        List<actor> actorList=conversations.getActors();
+        for (actor actors:actorList){
+            if (!actors.getUsername().equals(actor.getUsername())){
+                nameUserReCevie=actors.getUsername();
+            }
+        }
         ConversationResponse conversationResponse =new ConversationResponse().builder()
                 .id(conversations.getId())
+                .nameUserRecevive(nameUserReCevie)
                 .chatinfors(chatinforList)
                 .build();
         return conversationResponse ;
     }
     @Override
-    public List<ConversationResponse> findAllConversation(Long id){
-        List<Conversations> conversationsList=conversationRepository.findAll();
+    public List<ConversationResponse> findAllConversation(String token){
+        Jwt jwt=jwtDecoder.decode(token);
+        Long useridLong = jwt.getClaim("userid");
+        Integer userid = useridLong.intValue();
+        actor actor=actorRepository.findById(userid).orElseThrow(()->new RuntimeException("not found"));
+        List<Conversations> conversationsList=actor.getConservations();
         List<ConversationResponse> conversationResponseList =new ArrayList<>();
         for (Conversations conversations:conversationsList){
             List<Chat> chatList=conversations.getChats();
@@ -100,18 +158,23 @@ public class ConversationServiceimpl implements ConversationService {
                 chatinforList.add(chatinfor);
 
             }
+            String nameUserReCevie="";
+            List<actor> actorList=conversations.getActors();
+            for (actor actors:actorList){
+                if (!actors.getUsername().equals(actor.getUsername())){
+                    nameUserReCevie=actors.getUsername();
+                    break;
+                }
+            }
             ConversationResponse conversationResponse =new ConversationResponse().builder()
                     .id(conversations.getId())
+                    .nameUserRecevive(nameUserReCevie)
                     .chatinfors(chatinforList)
                     .build();
             conversationResponseList.add(conversationResponse);
-
-
         }
         return conversationResponseList;
     }
-
-
     @Override
     public void DeleteConversationById(Long id) {
         conversationRepository.deleteById(id);

@@ -12,5 +12,6 @@ import java.util.List;
 @Builder
 public class ConversationResponse {
     private Long id;
+    private String nameUserRecevive;
     private  List<Chatinfor> chatinfors;
 }

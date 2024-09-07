@@ -6,7 +6,8 @@ import java.util.List;
 
 public interface ConversationService {
     public void CreateConversation(String token);
-    public ConversationResponse findConversationById(Long id);
-    public List<ConversationResponse> findAllConversation(Long id);
+    public ConversationResponse findConversationById(Long id,String token);
+    public ConversationResponse findConversationByUserName(String name);
+    public List<ConversationResponse> findAllConversation(String token);
     public void DeleteConversationById(Long id);
 }

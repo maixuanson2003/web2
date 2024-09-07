@@ -42,9 +42,9 @@ public class SecurityConfig  {
                         .requestMatchers(HttpMethod.POST, "/api/books").hasAuthority("SCOPE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/cart/add").hasAuthority("SCOPE_USER")
                         .requestMatchers(HttpMethod.POST, "/api/orders/add").hasAuthority("SCOPE_USER")
-                        .requestMatchers(HttpMethod.POST, "/api/cart/create", "/api/librarycard/register").hasAuthority("SCOPE_USER")
+                        .requestMatchers(HttpMethod.POST, "/api/cart/create", "/api/librarycard/register","/api/conversations/create").hasAuthority("SCOPE_USER")
                         .requestMatchers(HttpMethod.DELETE, "/api/actors/{id}", "/api/books/{id}").hasAuthority("SCOPE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/actors", "/api/books", "/api/books/{id}", "/api/orders/all", "/api/books/sortByDate", "/api/books/search", "/api/cart/view").hasAnyAuthority("SCOPE_USER", "SCOPE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/actors", "/api/books", "/api/books/{id}", "/api/orders/all", "/api/books/sortByDate", "/api/books/search", "/api/cart/view","/api/conversations/user").hasAnyAuthority("SCOPE_USER", "SCOPE_ADMIN")
                         .anyRequest().permitAll()
                 )
                 .csrf(csrf -> csrf.disable())
@@ -57,7 +57,7 @@ public class SecurityConfig  {
 
     @Bean
     public JwtDecoder jwtDecoder(){
-        SecretKeySpec secretKeySpec=new SecretKeySpec(signerKey.getBytes(),"HS512");
+        SecretKeySpec secretKeySpec=new SecretKeySpec(signerKey.getBytes(),"HmacSHA512");
         return  NimbusJwtDecoder
                 .withSecretKey(secretKeySpec)
                 .macAlgorithm(MacAlgorithm.HS512)

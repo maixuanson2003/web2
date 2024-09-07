@@ -85,6 +85,8 @@ public class AuthenticationServiceimpl implements AuthenticationService {
             final String token = GenerateToken(userfind);
             authenCheck.setToken(token);
             authenCheck.setAuthenticated(true);
+            authenCheck.setUsername(userfind.getUsername());
+            authenCheck.setType(userfind.getType());
         } else {
             throw new RuntimeException("khong xac thuc duoc");
         }

@@ -7,7 +7,7 @@ import com.example.web2.Entity.Chat;
 import java.util.List;
 
 public interface ChatService {
-    public void SendMessage(ChatRequest message,String token);
+    public ChatRequest SendMessage(ChatRequest message,String token);
     public List<Chatinfor> GetMessageByconversations(String token, Long ConversationId);
     public void DeleteMessageByid(Long id);
 }

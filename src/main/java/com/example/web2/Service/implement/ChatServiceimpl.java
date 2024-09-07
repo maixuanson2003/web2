@@ -6,6 +6,7 @@ import com.example.web2.Entity.Chat;
 import com.example.web2.Entity.Conversations;
 import com.example.web2.Entity.actor;
 import com.example.web2.Repository.ChatRepository;
+import com.example.web2.Repository.ConversationRepository;
 import com.example.web2.Repository.actorRepository;
 import com.example.web2.Service.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,8 @@ public class ChatServiceimpl implements ChatService {
     private actorRepository actorRepository;
     @Autowired
     private JwtDecoder jwtDecoder;
+    @Autowired
+    private ConversationRepository conversationRepository;
 
     public ChatServiceimpl(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
@@ -42,21 +45,22 @@ public class ChatServiceimpl implements ChatService {
         return null;
     }
     @Override
-    public void SendMessage(ChatRequest message,String token){
+    public ChatRequest SendMessage(ChatRequest message,String token){
         Jwt jwt=jwtDecoder.decode(token);
         Long useridLong = jwt.getClaim("userid");
         Integer userid = useridLong.intValue();
         actor actors=actorRepository.findById(userid).orElseThrow(()->new RuntimeException("notfound"));
-        Chat chat=new Chat();
-        chat.builder()
+        Conversations conversations=conversationRepository.findById(message.getConversationId()).orElseThrow(()->new RuntimeException("sss"));
+        Chat chat=new Chat().builder()
                 .actors(actors)
                 .Content(message.getContent())
                 .userSend(message.getUserSender())
+                .Conversation(conversations)
                 .create_at(LocalDate.now().toString())
                 .userRceive(message.getUserRceive())
                 .build();
         chatRepository.save(chat);
-        messagingTemplate.convertAndSend("/Topic/Conversation/"+message.getConversationId().toString(),message);
+        return message;
     }
     @Override
     public List<Chatinfor> GetMessageByconversations(String token, Long ConversationId){
