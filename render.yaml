@@ -1,6 +1,11 @@
 services:
   - type: web
-    name: my-app
-    env: java
-    buildCommand:  "./mvnw clean install"
-    startCommand: "java -jar target/web2.jar"
+    name: springboot-docker-app
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: "/actuator/health"  # Kiểm tra sức khỏe ứng dụng nếu có actuator
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
