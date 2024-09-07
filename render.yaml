@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: my-app
+    env: java
+    buildCommand: mvn package
+    startCommand: java -jar target/your-app.jar
