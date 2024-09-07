@@ -2,5 +2,5 @@ services:
   - type: web
     name: my-app
     env: java
-    buildCommand: mvn package
-    startCommand: java -jar target/your-app.jar
+    buildCommand:  "./mvnw clean install"
+    startCommand: "java -jar target/web2.jar"
