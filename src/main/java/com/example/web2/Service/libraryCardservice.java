@@ -9,6 +9,7 @@ public interface libraryCardservice {
     public String registryLibraryCard(String full_Name,String birthDay,String phone,String Address, MultipartFile File) throws IOException;
     public libraryCardResponse getCardDetailsByActorId(int actorid) throws IOException;
     public String deleteCardById(int id);
+    public void  libraryCardExtension(String full_Name,String birthDay,String phone,String Address,String cardNumber);
     public List<libraryCardResponse> getAllLibraryCard() throws IOException;
 
 }

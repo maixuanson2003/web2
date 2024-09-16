@@ -30,4 +30,8 @@ public class AuthenticationController {
     public verigyTokenResponse verifyToken(verifytokenRequest request) throws JOSEException, ParseException {
         return authenticationService.veryfitoken(request);
     }
+    @PostMapping("/Logout")
+    public void Logout(String token) throws JOSEException, ParseException {
+         authenticationService.Logout(token);
+    }
 }

@@ -12,7 +12,9 @@ import java.text.ParseException;
 
 public interface AuthenticationService {
     public verigyTokenResponse veryfitoken(verifytokenRequest request) throws JOSEException, ParseException;
+    public void Logout(String token) throws ParseException, JOSEException ;
 
     public AuthenticationResponse login(AuthenticationRequest requests);
+
 
 }

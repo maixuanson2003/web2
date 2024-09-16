@@ -7,6 +7,7 @@ import com.example.web2.Entity.orders_details;
 import com.example.web2.Entity.cartloan;
 import com.example.web2.Entity.userorder;
 import com.example.web2.Entity.typetake;
+import com.example.web2.Enums.EnumOrder;
 import com.example.web2.Repository.typetakeRepository;
 import com.example.web2.Repository.cartloanRepository;
 import com.example.web2.Repository.actorRepository;
@@ -103,7 +104,7 @@ public class orderServiceimpl implements orderService {
         actor actors= actorRepository.findById(userid).orElseThrow(()->new RuntimeException("not found"));
         List<userorder> userorderList=actors.getLibrary_card().getUserorders();
         for (userorder userorder1:userorderList){
-            if(userorder1.getId()==userorder.getId()||userorder1.getStatus().equals("da xu ly")||userorder1.getStatus().equals("het han lay")){
+            if(userorder1.getId()==userorder.getId()||userorder1.getStatus().equals(EnumOrder.DA_LAY.getDescription())||userorder1.getStatus().equals("het han lay")){
                 return true;
             }
         }
@@ -145,7 +146,7 @@ public class orderServiceimpl implements orderService {
                    .librarycards(actors.getLibrary_card())
                    .timeCreate(LocalDate.now().toString())
                    .totalAmount(0)
-                   .status("dang xu ly")
+                   .status(EnumOrder.DANG_XU_LY.getDescription())
                    .build();
            userOrderRepository.save(userorders);
 

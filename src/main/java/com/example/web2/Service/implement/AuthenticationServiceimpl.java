@@ -4,8 +4,10 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.List;
+
+import com.example.web2.Entity.TokenInvalid;
 import com.example.web2.Entity.actor;
+import com.example.web2.Repository.TokenInvalidRepository;
 import com.example.web2.Repository.actorRepository;
 import com.example.web2.DTO.request.AuthenticationRequest;
 import com.example.web2.DTO.request.verifytokenRequest;
@@ -17,7 +19,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
-import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -32,6 +33,8 @@ import com.nimbusds.jwt.SignedJWT;
 
 @Service
 public class AuthenticationServiceimpl implements AuthenticationService {
+    @Autowired
+    private TokenInvalidRepository tokenInvalidRepository;
     @Autowired
     private  actorRepository actors;
     protected static final String KEY = "NQc7mrnHIwVaDA519Ka3ph/ZdHVjvu5NhWkNMfExmAIHpDtO3PShgPqK4w3Rivq7";
@@ -93,6 +96,30 @@ public class AuthenticationServiceimpl implements AuthenticationService {
         return authenCheck;
 
     }
+    @Override
+    public void Logout(String token) throws ParseException, JOSEException {
+        var signtoken=verifyToken( token);
+        TokenInvalid tokenInvalid=new TokenInvalid().builder()
+                .id(signtoken.getJWTClaimsSet().getJWTID())
+                .expiryTime(signtoken.getJWTClaimsSet().getExpirationTime())
+                .build();
+        tokenInvalidRepository.save(tokenInvalid);
+
+    }
+    private  SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(KEY.getBytes());
+        SignedJWT sign = SignedJWT.parse(token);
+        Date tokenExpiry = sign.getJWTClaimsSet().getExpirationTime();
+        var verify=sign.verify(verifier);
+        if (!(verify&&tokenExpiry.after(sign.getJWTClaimsSet().getExpirationTime()))){
+            throw new RuntimeException("khong xac thuc duoc");
+        }
+        if (tokenInvalidRepository.existsById(sign.getJWTClaimsSet().getJWTID())){
+            throw new RuntimeException("khong xac thuc duoc");
+        }
+
+        return sign;
+    }
 
     private String GenerateToken(actor actors) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -111,7 +138,5 @@ public class AuthenticationServiceimpl implements AuthenticationService {
             throw new RuntimeException("error");
 
         }
-
     }
-
 }

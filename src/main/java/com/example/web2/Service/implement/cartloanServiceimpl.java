@@ -63,6 +63,10 @@ public class cartloanServiceimpl implements CartLoanService {
         Long useridLong = jwt.getClaim("userid"); // Lấy giá trị dưới dạng Long
         Integer userid = useridLong.intValue();
         actor actors=actorRepository.findById(userid).orElseThrow(()->new RuntimeException("not found"));
+        cartloan cartloanActor=actors.getLibrary_card().getCartloan();
+        if (cartloanRepository.existsById(cartloanActor.getId())){
+            throw new RuntimeException("Cart Đã tồn tại");
+        }
         cartloan cartloan=new cartloan().builder()
                 .amount(0)
                 .libraryCard(actors.getLibrary_card())

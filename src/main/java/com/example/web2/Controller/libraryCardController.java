@@ -52,6 +52,10 @@ public class libraryCardController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @PutMapping("/Extesion")
+    public void  libraryCardExtension(@RequestParam(required = true) String full_Name,@RequestParam(required = true) String birthDay, @RequestParam(required = true) String phone, @RequestParam(required = true) String Address, @RequestParam(required = true) String cardNumber){
+        libraryCardservice.libraryCardExtension(full_Name,birthDay,phone,Address,cardNumber);
+    }
 
     // Endpoint để lấy tất cả thẻ thư viện
     @GetMapping

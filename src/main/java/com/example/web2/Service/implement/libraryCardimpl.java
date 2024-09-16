@@ -1,6 +1,7 @@
 package com.example.web2.Service.implement;
 import com.example.web2.DTO.response.libraryCardResponse;
 import com.example.web2.Entity.actor;
+import com.example.web2.Enums.LibraryCardEnums;
 import com.example.web2.Service.libraryCardservice;
 import com.example.web2.Repository.librarycardRepository;
 import com.example.web2.Service.actorService;
@@ -19,6 +20,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -159,6 +161,37 @@ public class libraryCardimpl implements libraryCardservice  {
             libraryCardResponseList.add(libraryCardResponse);
         }
         return libraryCardResponseList;
+    }
+    @Override
+    public void  libraryCardExtension(String full_Name,String birthDay,String phone,String Address,String cardNumber){
+        actor actors=findByFullName(full_Name);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate CheckBirthDay=LocalDate.parse( birthDay,formatter);
+        LocalDate actorOfBirthDay=LocalDate.parse( actors.getBirthday(),formatter);
+        boolean CheckUserProfileCard=false;
+
+        if (CheckBirthDay.isEqual(actorOfBirthDay)&&actors.getPhone_number().equals(phone)&&actors.getLibrary_card().getCardNumber().equals(cardNumber)){
+            CheckUserProfileCard=true;
+        }
+        if (CheckUserProfileCard){
+            librarycard librarycard=librarycardRepository.findById(actors.getLibrary_card().getId()).orElseThrow(()->new RuntimeException("Card not found"));
+            LocalDate ExpiryDate=LocalDate.parse(librarycard.getExpiryDate(),formatter);
+            LocalDate Date=LocalDate.now();
+            long daysBetween= ChronoUnit.DAYS.between(Date,ExpiryDate);
+            if (librarycard.getStatus().equals(LibraryCardEnums.HET_HAN.getMessage())|| daysBetween<=30){
+                librarycard.setExpiryDate(Date.plusMonths(6).toString());
+                if (librarycard.getStatus().equals(LibraryCardEnums.HET_HAN.getMessage())){
+                    librarycard.setStatus(LibraryCardEnums.CON_HAN.getMessage());
+                }
+            }
+            librarycardRepository.save(librarycard);
+            String userEmail = librarycard.getActors().getEmail();
+            String message = "Bạn đã gia hạn thành Công thẻ thư viện";
+            emailServiceimpl.sendEmail(userEmail, "Thông báo Gia hạn thẻ thành Công", message);
+
+        }else {
+            throw new RuntimeException("cardInfo not match");
+        }
     }
     @Scheduled(fixedDelay = 60000)
     public void CheckDatelibrary(){
